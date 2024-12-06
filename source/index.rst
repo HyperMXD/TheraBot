@@ -8,16 +8,17 @@ TheraBot
 
 TheraBot is a therapeutic chatbot designed to provide mental health support through empathetic and evidence-based interactions. The chatbot employs Retrieval-Augmented Generation (RAG) to incorporate external resources and uses an LLM-based framework for natural conversation. 
 
+We used two diffrent methods to embed and retrieve documents.
+
 This project is made by Mouad BOULAID & Zineb DKIER
 Supervised by: Dr. Tawfik MASROUR
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
     :caption: Table of contents
 
-    index
     method_1
-    methode_2
+    method_2
 
 
 Features
