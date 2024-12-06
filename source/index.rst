@@ -10,8 +10,9 @@ TheraBot is a therapeutic chatbot designed to provide mental health support thro
 
 We used two diffrent methods to embed and retrieve documents.
 
-This project is made by Mouad BOULAID & Zineb DKIER
-Supervised by: Dr. Tawfik MASROUR
+This project is made by **Mouad BOULAID** & **Zineb DKIER**.
+
+Supervised by: **Dr. Tawfik MASROUR**
 
 .. toctree::
     :maxdepth: 1
