@@ -14,7 +14,7 @@ This project is made by Mouad BOULAID & Zineb DKIER
 Supervised by: Dr. Tawfik MASROUR
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: Table of contents
 
     method_1
