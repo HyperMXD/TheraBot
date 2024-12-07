@@ -14,12 +14,12 @@ from langchain.docstore.document import Document
 
 os.environ['LANGCHAIN_TRACING_V2']='true'
 os.environ['LANGCHAIN_ENDPOINT']="https://api.smith.langchain.com"
-os.environ['LANGCHAIN_API_KEY']="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"
-os.environ['LANGCHAIN_PROJECT']="llm_llama3_1"
+os.environ['LANGCHAIN_API_KEY']="YOUR_API_KEY"
+os.environ['LANGCHAIN_PROJECT']=""
 
 #Create the vectorstoreu using webscraping
 def create_db():
-    FireCrawl_API = 'fc-0a813ae8038e4d499ab94e2c6435e287'
+    FireCrawl_API = 'YOUR_API_KEY'
     DB_FAISS_PATH = 'vectorstores/db_faiss'
 
     urls = [
@@ -68,10 +68,15 @@ class GenerateResponse:
         You are a therapist, and your primary goal is to offer support, understanding, and guidance to the user in a compassionate and professional manner.
         Always respond empathetically, non-judgmentally, and with respect.
         Your role is to help the user feel heard and understood, not to judge.
+        Respond with empathy and only with evidence-based advice, referencing only to the relevant documents provided.
         Provide support using active listening and ask open-ended questions to explore the user's feelings and thoughts.
         Only provide information that you are sure about.
         If you do not know the answer to something, politely acknowledge that you are not sure and suggest that the user consult a professional therapist or doctor for more specific advice.
+        If asked about medications, drugs, or any substances for medical purposes, including recommendations or information on usage, kindly explain that you cannot provide that information and encourage the user to speak with a licensed medical professional. 
+        Avoid providing any information that could be interpreted as medical advice.
         If asked for medical advice or anything outside your expertise, explain that you cannot provide those details and encourage the user to speak with a licensed professional.
+        Use the relevant documents that have been provided, use the information from those documents to assist in answering the user's question.The documents may contain specific, helpful information that is relevant to the user's inquiry.
+        Ensure that the response is based on both the user's question and the relevant content from the documents. Do not include irrelevant details, and make sure to stay within your therapeutic role while responding.
         Always prioritize the safety and well-being of the user.
         Do not request or store personal information.
         If the user mentions any harm to themselves or others, gently advise them to seek immediate professional help or contact a trusted person in their life.
@@ -89,8 +94,7 @@ class GenerateResponse:
         If there is no answer, please answer with "I m sorry, the context is not enough to answer the question.
         When asked about someone (celebrity for example) say "sorry, I don't wanna talk about other people". Stick to the context of mental health. If the situation is serious refer to moroccan health services.
         Don't insist on questions, try to be friendly and make the client feel comfortable talking with you.
-        don't repeat the same questions in the same message.
-        Talk like a friend and be casual.
+        Don't repeat the same questions in the same message.
         Relevant Documents : {document}
         Question: {question}
         Answer:
@@ -99,20 +103,20 @@ class GenerateResponse:
         #prompt to check if RAG is needed
         self.rag_check_prompt = """
         You are a highly intelligent assistant designed to decide whether a query requires additional information from external sources (like documents) to provide a complete answer.
-        Respond with "True" if the query requires external information and "False" otherwise.
-        
+        Respond with "True" if the query involves scientific, medical, or evidence-based information, such as mental health conditions, medical conditions, or psychological coping strategies. In these cases, external references like research articles, therapeutic methods, or clinical guidelines are necessary.
+        Example: Queries like "How can I deal with amnesia?" or "What are effective ways to manage anxiety?" require scientific and evidence-based details, so respond with "True"
+        Respond only with " True " or " False "
         Query: "{query}"
         Needs External Information (True/False):
         """
-        self.prompt = ChatPromptTemplate.from_template(self.prompt_template)
-
     def check_need_for_rag(self,user_query):
         #determine if the user's query needs RAG.
         try:
-            rag_check_input = self.rag_check_prompt.format(query=user_query)
             #check for RAG requirement
-            response = self.model.invoke({"question": rag_check_input})
-            return response.strip().lower() == "true"
+            check_prompt = ChatPromptTemplate.from_template(self.rag_check_prompt)
+            query_grader = check_prompt | self.model
+            query_grade = query_grader.invoke({"query":user_query})
+            return query_grade.strip().lower() == "true"
         except Exception as e:
             print(f"Error checking for RAG need: {str(e)}")
             return False  #default to no RAG on failure
