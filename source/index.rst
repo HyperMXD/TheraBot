@@ -36,7 +36,7 @@ This project is made by **Mouad BOULAID** & **Zineb DKIER**.
 Supervised by: **Dr. Tawfik MASROUR**
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
     :caption: Table of contents
 
 Features
