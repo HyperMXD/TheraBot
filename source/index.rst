@@ -6,6 +6,26 @@
 TheraBot
 ========
 
+
+This project is made by **Mouad BOULAID** & **Zineb DKIER**.
+
+Supervised by: **Dr. Tawfik MASROUR**
+
+Table of contents
+-----------------
+- `Introduction <#introduction>`_
+- `Features <#features>`_
+- `Pipeline <#pipeline>`_
+- `Text Input <#text-input>`_
+- `Audio Input <#voice-input>`_
+- RAG : 
+   - `Web Scraping <method_1.html#first-method>`_
+   - `PDF Parsing <method_2.html#second-method>`_
+- `Text Generation <#text-generation>`_
+
+Introduction
+============
+
 AI in mental health is not a new topic for discussion. In the 1960s,the first chatbot, ELIZA,
 was created by Joseph Weizenbaum at MIT.It operated using a script called DOCTOR,
 which allowed it to respond like a psychotherapist. But despite of it’s simplicity it was
@@ -30,15 +50,6 @@ be a helpful tool for those who need immediate support or as an addition to clin
 therapy. And as the technology continues to improve, these chatbots will definitely be
 more efficient in identifying and responding to human emotions, a plus to mental health
 care.
-
-This project is made by **Mouad BOULAID** & **Zineb DKIER**.
-
-Supervised by: **Dr. Tawfik MASROUR**
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Table of contents
-
 
 Features
 ========
@@ -156,22 +167,17 @@ If the transcription is successful, the **user_query** variable will store the t
 
 Finally, the audio input converted into a text format can be handled as a text input and passed to RAG (Retrieval-Augmented Generation) and the llama model for response generation.
 
-RAG : Retrieving data using Web Scraping with Firecrawl
-=======================================================
-.. toctree::
-    :maxdepth: 1
+Text Generation
+===============
 
-    method_1
+Using one of the two RAG methods (or combining them), responses are generated using LLaMa3.1.
+In the first method, we check whether the rag is required or not:
 
-RAG : Extracting data from PDF : Parsing with LLaMAparse
-========================================================
-.. toctree::
-    :maxdepth: 1
+- `Generating Output - First Method <method_1.html#generating-chatbot-output>`_
 
-    method_2
+In the second method, instead of checking whether the rag is needed or not. We simply add in the prompt template an instruction telling the model to combine what it knows with what's in the document (the retrieved document based on the user's question):
 
-LLaMa for Text Generation
-=========================
+- `Generating Output - Second Method <method_2.html#chatbot-response-generation>`_
 
 UI Development (`TheraBot Interface`)
 =====================================
