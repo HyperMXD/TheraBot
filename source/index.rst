@@ -13,15 +13,15 @@ Supervised by: **Dr. Tawfik MASROUR**
 
 Table of contents
 -----------------
-- `Introduction <#introduction>`_
-- `Features <#features>`_
-- `Pipeline <#pipeline>`_
-- `Text Input <#text-input>`_
-- `Audio Input <#voice-input>`_
+- `Introduction <index.html#introduction>`_
+- `Features <index.html#features>`_
+- `Pipeline <index.html#pipeline>`_
+- `Text Input <index.html#text-input>`_
+- `Audio Input <index.html#voice-input>`_
 - RAG : 
    - `Web Scraping <method_1.html#first-method>`_
    - `PDF Parsing <method_2.html#second-method>`_
-- `Text Generation <#text-generation>`_
+- `Text Generation <index.html#text-generation>`_
 
 Introduction
 ============
