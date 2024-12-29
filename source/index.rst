@@ -156,6 +156,20 @@ If the transcription is successful, the **user_query** variable will store the t
 
 Finally, the audio input converted into a text format can be handled as a text input and passed to RAG (Retrieval-Augmented Generation) and the llama model for response generation.
 
+RAG : Retrieving data using Web Scraping with Firecrawl
+=======================================================
+.. toctree::
+    :maxdepth: 1
+
+    method_1
+
+RAG : Extracting data from PDF : Parsing with LLaMAparse
+========================================================
+.. toctree::
+    :maxdepth: 1
+
+    method_2
+
 LLaMa for Text Generation
 =========================
 
