@@ -81,13 +81,14 @@ def main():
             record_audio = st.button("🎙️")
     
         # Float the footer container and provide CSS to target it with
-    input_placeholder.float("bottom: 0;height:100px; background:rgba(256, 256, 256);")
+    input_placeholder.float("bottom: 0px;padding : 30px 20px 50px 20px; border-radius: 10px; background:#0E1117;")
 
 
     # Process user input
     if user_message:
         with st.chat_message("user"):
-            st.write(user_message)
+            st.markdown(user_message)
+
         doc = retrieve_from_db(user_message)
         # Generate response
         response = generate_response(user_message, chat_history=st.session_state.chat_log, doc= doc)
@@ -105,12 +106,13 @@ def main():
         # Handle audio recording
         r = sr.Recognizer()
         with sr.Microphone() as source:
-            st.write("Talk...")
+            st.markdown("You can start talking...")
+            r.adjust_for_ambient_noise(source, duration=0.2)  
             audio_text = r.listen(source)
             try:
                 user_message = r.recognize_google(audio_text)
                 with st.chat_message("user"):
-                    st.write(user_message)
+                    st.markdown(user_message)
                 doc = retrieve_from_db(user_message)
                 # Generate response
                 response = generate_response(user_message, chat_history=st.session_state.chat_log, doc=doc)
@@ -124,7 +126,7 @@ def main():
                     st.session_state.chat_log.append({"name": "user", "msg": user_message})
                     st.session_state.chat_log.append({"name": "assistant", "msg": response})
             except:
-                st.write("Sorry, I did not get that")
+                st.markdown("Sorry, I did not get that")
 
     
 
