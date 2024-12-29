@@ -19,7 +19,7 @@ Table of contents
 - `Text Input <index.html#id4>`_
 - `Audio Input <index.html#voice-input>`_
 - RAG : 
-   - `Web Scraping <method_1.html#first-method>`_
+   - `Web Scraping <method_1.html#rag-:-retrieving-data-using-web-scraping-with-firecrawl>`_
    - `PDF Parsing <method_2.html#second-method>`_
 - `Text Generation <index.html#id5>`_
 
