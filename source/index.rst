@@ -38,10 +38,7 @@ Supervised by: **Dr. Tawfik MASROUR**
 .. toctree::
     :maxdepth: 2
     :caption: Table of contents
-    :titlesonly:
 
-    method_1
-    method_2
 
 Features
 ========
