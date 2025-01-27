@@ -22,10 +22,14 @@ Table of contents
 - `Select The Text Generation Model <index.html#id5>`_
 - `Database Creation <index.html#id6>`_
    - `Database Creation Using Web Scraping with Firecrawl <index.html#id7>`_
-   - `Database Creation Using PDF Parsing with Llama Parse <index.html#id8>`_
-- `RAG Implementation and Text Generation <index.html#id9>`_
+   - `Database Creation Using PDF Parsing with Llama Parse <index.html#>`_
+- `RAG Implementation and Text Generation <index.html#id8>`_
+   - `Using Web Scraping <index.html#>`_
+   - `Using PDFs <index.html#>`_
 - `Speech to Text <index.html#id10>`_
 - `UI Development (TheraBot Interface) <index.html#id11>`_
+   - `Using Web Scraping <index.html#>`_
+   - `Using PDFs <index.html#>`_
 
 Introduction
 ============
@@ -338,8 +342,158 @@ A retriever works with the FAISS database to find relevant documents based on us
       db.save_local(DB_FAISS_PATH)
       retriever = db.as_retriever()
 
+
+Database Creation Using PDF Parsing with Llama Parse
+====================================================
+
+For this method, you could use multiple documents as a reference. For our case we'll be trying to use only 1 pdf file containing a pretty good amount of informations that are both basic (somewhat general) and also a bit specific and detailed (specifically for the fields of psychology and psychiatry). The book we're using is Psychology : The Key Concepts, written by Graham Richards. This book provides a comprehensive overview of 200 key concepts essential for a strong understanding of psychology, incorporating the latest guidelines from the British Psychological Society (BPS). The focus is on practical uses of Psychology in settings such as nursing, education and human resources, with topics ranging from Gender to Psychometrics and Perception.
+
+In order to use the book as a source of informations for the LLM. We first need to extract and organize the data from that book.
+
+We will do that in 3 main step. 
+
+1. Parsing the PDF files
+------------------------
+
+We first need to parse the PDF file. Meaning we need to analyze the text contained in the PDF file, extract relevant data and then structure that data into a good usable format. For that, we're using LlamaParse.
+
+LlamaParse is a GenAI-native parser built with LLMs and for LLM use cases. It can parse and transform complex documents into LLM-ready formats with unparalleled accuracy (for any downstream LLM use case such as advanced RAG).
+What makes this a really good choice is that it exists as a standalone API. The API is self-serve and available to everyone, meaning it's FREE. Also, LlamaParse can be prompted to get your data structured however you want.
+
+In this guide we'll be saving the data into a markdown (MD) file.
+
+2. Text Splitting
+-----------------
+
+After successfully parsing the pdf file, the second step is to split the text contained in our MD file. To do that we'll be using Langchain's RecursiveCharacterTextSplitter function.
+
+LangChain is basically a framework designed for developing applications powered by LLMs. It simplifies building advanced applications by integrating language models with external tools. 
+
+The RecursiveCharacterTextSplitter function in LangChain is a utility for breaking down long text into smaller, manageable chunks. It’s particularly useful when processing lengthy documents with large language models, which often have token limits. This splitter is designed to preserve meaning and context as much as possible while dividing the text. We're using it instead of the CharacterTextSplitter function in order to :
+
+	• Preserve the context and meaning:
+By breaking text hierarchically using multiple delimiters (e.g., paragraphs → sentences → words → characters). This ensures chunks are split at logical points, preserving meaning and coherence as much as possible.
+
+While CharacterTextSplitter function splits text strictly by a single delimiter or character count, regardless of the content structure.
+
+	• Flexible Delimiters:
+RecursiveCharacterTextSplitter tries to split at meaningful delimiters (\n\n, \n, spaces) before resorting to splitting by individual characters. For example, it first tries to split text by paragraphs, then by sentences, and finally by individual words/characters if the chunk size isn't met. While, CharacterTextSplitter in the other hand, uses a single, rigid delimiter or a fixed character count. If the text doesn’t align perfectly with the delimiter, it may split mid-word or mid-sentence.
+
+As a conclusion, for our case the RecursiveCharacterTextSplitter is the smarter choice since the context and natural breaks are critical. It'll ensure that the chunks make more sense.
+
+3. Embedding  and Setting up the Vector Database
+------------------------------------------------
+
+You might be wondering, how is it possible to save those chunks so that the LLM can access them and know exactly the context? What format should be used? Where are we going to save them? …etc.
+
+Well, in order to differenciate between the chunks, context-wise, we can't keep the chunks as a text. We need something that would make it possible to understand that there is a difference between chunks. A machine learning model can't understand that "being depressed" is diifferent from "being sad". But it can understand that the vector (1,1) is different from (1,0). So that's exactly what we will be doing.
+
+We need to convert the text chunks into numerical representations (vectors) for storage and quering, and that's exactly the process of Creating Embeddings. Those embeddings will be stored in a vector database in order to do a similarity search and retrieve data from it.
+
+For the Vector database, we used Chroma in this method. Since we're associating metadata like topics, section titles. Chroma allows to attach metadata to each chunk and query it alongside the embeddings, making it easy to filter and sort results based on context. The storage is also very persistent, this ensures the saved chunks are available accross the sessions. Chroma integrates smoothly with Langchain as well. Finally, if  we used more PDF documents, Chroma can handle a large volume of embeddings efficiently.
+
+Implementation
+--------------
+
+Now let's get practical.
+
+First thing to do is to import the libraries :
+
+   .. code-block:: python
+
+	import os
+	from llama_parse import LlamaParse
+	from llama_parse.base import ResultType, Language
+	from langchain.text_splitter import RecursiveCharacterTextSplitter
+	from langchain.vectorstores import Chroma
+	from langchain_community.embeddings.ollama import OllamaEmbeddings
+	from langchain_core.documents import Document
+
+You can set up the LlamaCloud API key as an environment variable using :
+
+   .. code-block:: python
+
+	os.environ["LLAMA_CLOUD_API_KEY"]= "API_KEY"
+
+You should replace "API_KEY" with your LlamaCloud API key.
+
+
+Now we need to define the parser :
+
+   .. code-block:: python
+
+	parser = LlamaParse(result_type=ResultType.MD,language=Language.ENGLISH)
+
+The next thing to do is to load the text from the PDF file, using our parser, and save it to a Markdown file: 
+
+   .. code-block:: python
+
+	#Parsing into the documents variable
+	documents = parser.load_data(
+	    "PsychologyKeyConcepts.pdf"
+	)
+	#Writing the result of parsing into the file psychology_data.md
+	filename = "psychology_data.md"
+	with open(filename, 'w') as f:
+	    f.write(documents[0].text)
+
+Now we got our data extracted into a markdown file called "psychology_data". The next step is to split it into chunks!
+
+   .. code-block:: python
+
+	with open("psychology_data.md", encoding='utf-8') as f:
+	    doc = f.read()
+	
+	#defining the splitter
+	r_splitter = RecursiveCharacterTextSplitter(
+	    chunk_size=2000,
+	    chunk_overlap=0,
+	    separators=["\n\n", "\n", "(?<=\. )", " ", ""]
+	)
+	#Splitting the text
+	docs = r_splitter.split_text(doc)
+	print("data has been split.")
+
+To create embeddings for the text chunks, we will be using OllamaEmbeddings since we want a local, privacy-friendly, and cost-effective solution. The mxbai-embed-large model is a compelling choice for generating embeddings due to its specific design for high-quality, contextually aware vector representations:
+
+   .. code-block:: python
+
+	# Convert the list of strings to a list of Document objects
+	docs = [Document(page_content=d) for d in docs]
+	embeddings = OllamaEmbeddings(model="mxbai-embed-large:latest")
+	print("embeddings created.")
+
+The last thing to do now, is to define the vector database and populate it.
+
+   .. code-block:: python
+
+	#defining vector database directory
+	persist_directory = "Psycho_db"
+
+	# Load the database
+	vecdb = Chroma(persist_directory=persist_directory, 
+	embedding_function=OllamaEmbeddings(model="mxbai-embed-large:latest"), 
+	collection_name="rag-chroma")
+
+	vecdb.add_documents(docs)
+	print("data has been added to the database.")
+	vecdb.persist()
+	print("Data has been ingested into vector database.")
+
+After doing that, it's practical to test it out, to see if everything is working out well.
+
+   .. code-block:: python
+
+	#Testing
+	question = "what is depression?"
+	documents = vecdb.similarity_search(question,k=5)
+	print(documents[0].page_content)
+
 RAG Implementation and Text Generation
 ======================================
+
+1- Using Web Scraping
+=====================
 
 Now that we’ve built the knowledge base, let’s talk about how the chatbot uses it to generate responses. We’ll do this using a class called GenerateResponse. A class is like a blueprint that defines how the chatbot works. It organizes all the steps and logic into one place, making it easier to manage and reuse.
 
@@ -583,6 +737,81 @@ Finally, the conversation between the user and the model is logged to maintain a
           chat = {"user": user_query, "assistant": response}
           self.chat_history.append(chat)
 
+2- Using PDFs
+=============
+
+In this part, we will be focusing on generating text based on the user's query and our vector database. The user will have to enter an input, that will be then processed by the model Llama3.1 and based on the user's input it should understand whether it's necessary to go back to the vector database and retrieve data, or answer based on what it knows.
+
+The libraries used in this file are : 
+
+   .. code-block:: python
+
+      	import ollama
+	from langchain.vectorstores import Chroma
+	from langchain_community.embeddings.ollama import OllamaEmbeddings
+	from langchain_ollama import OllamaLLM
+	from langchain_core.prompts import ChatPromptTemplate
+
+So first, let's load the vector database with embedded documents to enable similarity-based retrieval: 
+
+   .. code-block:: python
+
+      	persist_directory = "rag/Pyscho_db"
+	vecdb = Chroma(
+	    persist_directory=persist_directory,
+	    embedding_function=OllamaEmbeddings(model="mxbai-embed-large:latest"),
+	    collection_name="rag-chroma"
+	)
+
+Now we need to make the retrieval function :
+
+   .. code-block:: python
+
+	def retrieve_from_db(question):
+	    # get the model
+	    model = OllamaLLM(model="llama3.2")
+	    # initialize the vector store
+	    retriever = vecdb.as_retriever()
+	    retrieved_docs = retriever.invoke(question)
+	    retrieved_docs_txt = retrieved_docs[1].page_content
+	    return retrieved_docs_txt
+
+We should make the main generation function, which will be the main function that the model uses in order to answer the user. But we need to combine it with the retrieval logic.
+There are many ways to do that, we can for example make a verification function that'll enable us to know whether the user's input relates to mental health or not.  But, we will keep everything simple and just add up everything into the model's prompt.
+
+   .. code-block:: python
+
+	def generate_response(user_message: str, chat_history: list=[], doc=""):
+		#give role to Chatbot    
+		system_msg=("""You are a Chatbot for mental health support, don't overtalk. When the users are trying to harm themselves, remind them that they're loved by someone.
+		When asked about someone say "sorry, I don't wanna talk about people". Stick to the context of mental health. If the situation is serious refer to moroccan health services.
+		Don't insist on questions, try to be friendly and make the client feel comfortable talking with you.
+		don't repeat the same questions in the same message.
+		Don't say "Based on the provided context" or "According to the provided document" or any such phrases.
+		if there is no answer, please answer with "I m sorry, the context is not enough to answer the question.
+		Don't keep on questioning what's happening, your main job is to listen actively and make the client feel comfortable with you.
+		Combine what you know and verify it using the Relevant Documents : {document}
+		User input: {question}
+		
+			""")        
+		my_message = [{"role": "system", "content": system_msg,  "document": doc}]
+		#Append history in message 
+		for chat in chat_history:                      
+			my_message.append({"role": chat["name"], "content": chat["msg"]})
+		#Append the latest question in message
+		my_message.append({"role": "user", "content": user_message, "document": doc})
+		response = ollama.chat(                      
+		model="llama3.2",
+		messages=my_message
+		) 
+		return response["message"]["content"]
+
+So, as you can see. By prompting the model we make it understand its job (being an assistant for mental health support). Also, we tell it to combine what it knows with what's in the "documents". Basically what we're trying to do is :
+	- Get the user input
+	- Use the retrieval function
+	- Save the result in a file called "document" 
+	- Use that "document" file as a verification tool for what the model knows.
+
 
 Speech to Text
 ==============
@@ -652,8 +881,13 @@ If the transcription is successful, the **user_query** variable will store the t
 
 Finally, the audio input converted into a text format can be handled as a text input and passed to RAG (Retrieval-Augmented Generation) and the llama model for response generation.
 
+
 UI Development (`TheraBot Interface`)
 =====================================
+
+1- Using Web Scraping
+---------------------
+
 We will create a Streamlit web application for the chatbot.We will be using streamlit for the interface, GenerateResponse for generating chatbot responses, and speech_recognition for voice input. 
 
    .. code-block:: python
@@ -695,7 +929,7 @@ We will create a Streamlit web application for the chatbot.We will be using stre
 	            recorder = st.button("🎙️")
 	
 	    # Float the footer container and provide CSS to target it with
-	    input_placeholder.float("bottom: 0; padding : 30px 20px 50px 20px border-radius: 10px; background:#0E1117;")
+	    input_placeholder.float("bottom: 0; padding : 30px 20px 50px 20px; border-radius: 10px; background:#0E1117;")
 	
 	    # Accept user input from text or transcription
 	    if user_query:
@@ -739,3 +973,90 @@ We will create a Streamlit web application for the chatbot.We will be using stre
 	
 	if __name__ == "__main__":
 	    main()
+
+2- Using PDFs
+-------------
+For this method, you will use pretty much a similar code to the one mentioned in the first method, except that you would have to use the name of the functions mentioned for this method in the RAG and text generation Section, and you will have to use the retrieval logic mentioned in the rag explanation for this method.
+
+There are some few changes in this code, here is what it looks like:
+
+   .. code-block:: python
+
+	def main():
+	    if "chat_log" not in st.session_state:
+	        st.session_state.chat_log = []
+	
+	    # Display chat history
+	
+	    for chat in st.session_state.chat_log:
+	        with st.chat_message(chat["name"]):
+	            st.write(chat["msg"])
+	
+	    # Placeholder for the input section (audio + text)
+	    # Create footer container and add content
+	
+	    input_placeholder = st.container()
+	    with input_placeholder.container():
+	        col1, col2 = st.columns([11, 1], gap="small")
+	        with col1:
+	            user_message = st.chat_input("What is up?", key="user_input")
+	        with col2:
+	            record_audio = st.button("🎙️")
+	    
+	        # Float the footer container and provide CSS to target it with
+	
+	    input_placeholder.float("bottom: 0px;padding : 30px 20px 50px 20px; border-radius: 10px; background:#0E1117;")
+	
+	    # Process user input
+	
+	    if user_message:
+	        with st.chat_message("user"):
+	            st.markdown(user_message)
+	        doc = retrieve_from_db(user_message)
+	
+	        # Generate response
+	
+	        response = generate_response(user_message, chat_history=st.session_state.chat_log, doc= doc)
+	        if response:
+	            with st.chat_message("assistant"):
+	                assistant_response_area = st.empty()
+	                assistant_response_area.write(response)
+	
+	            # Update chat history
+	
+	            st.session_state.chat_log.append({"name": "user", "msg": user_message})
+	            st.session_state.chat_log.append({"name": "assistant", "msg": response})
+	    elif record_audio:
+	
+	        # Handle audio recording
+	
+	        r = sr.Recognizer()
+	        with sr.Microphone() as source:
+	            st.markdown("You can start talking...")
+	            r.adjust_for_ambient_noise(source, duration=0.2)  
+	            audio_text = r.listen(source)
+	            try:
+	                user_message = r.recognize_google(audio_text)
+	                with st.chat_message("user"):
+	                    st.markdown(user_message)
+	                doc = retrieve_from_db(user_message)
+	
+	                # Generate response
+	
+	                response = generate_response(user_message, chat_history=st.session_state.chat_log, doc=doc)
+	                if response:
+	                    with st.chat_message("assistant"):
+	                        assistant_response_area = st.empty()
+	                        assistant_response_area.write(response)
+	
+	                    # Update chat history
+	
+	                    st.session_state.chat_log.append({"name": "user", "msg": user_message})
+	                    st.session_state.chat_log.append({"name": "assistant", "msg": response})
+	            except:
+	                st.markdown("Sorry, I did not get that")
+    
+	if __name__ == "__main__":
+	    main()
+
+
