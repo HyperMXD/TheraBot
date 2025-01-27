@@ -809,8 +809,8 @@ There are many ways to do that, we can for example make a verification function 
 So, as you can see. By prompting the model we make it understand its job (being an assistant for mental health support). Also, we tell it to combine what it knows with what's in the "documents". Basically what we're trying to do is :
 	- Get the user input
 	- Use the retrieval function
-	- Save the result in a file called "document" 
-	- Use that "document" file as a verification tool for what the model knows.
+	- Save the result in a variable called "document" 
+	- Use that "document" variable as a verification tool for what the model knows.
 
 
 Speech to Text
