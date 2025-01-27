@@ -21,7 +21,7 @@ Table of contents
 - `Pipeline <index.html#id4>`_
 - `Select The Text Generation Model <index.html#id5>`_
 - `Database Creation <index.html#id6>`_
-   - `Database Creation Using Web Scraping with Firecrawl <index.html#>`_
+   - `Database Creation Using Web Scraping with Firecrawl <index.html#database-creation-using-web-scraping-with-firecrawl>`_
    - `Database Creation Using PDF Parsing with Llama Parse <index.html#>`_
 - `RAG Implementation and Text Generation <index.html#id7>`_
 - `Speech to Text <index.html#id8>`_
