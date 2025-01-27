@@ -15,21 +15,21 @@ This documentation explains the process of creating a therapeutic chatbot using 
 
 Table of contents
 -----------------
-- `Introduction <index.html#id1>`_
-- `Features <index.html#id2>`_
-- `Requirements <index.html#id3>`_
-- `Pipeline <index.html#id4>`_
-- `Select The Text Generation Model <index.html#id5>`_
-- `Database Creation <index.html#id6>`_
-   - `Database Creation Using Web Scraping with Firecrawl <index.html#id7>`_
-   - `Database Creation Using PDF Parsing with Llama Parse <index.html#>`_
-- `RAG Implementation and Text Generation <index.html#id8>`_
-   - `Using Web Scraping <index.html#>`_
-   - `Using PDFs <index.html#>`_
-- `Speech to Text <index.html#id10>`_
-- `UI Development (TheraBot Interface) <index.html#id11>`_
-   - `Using Web Scraping <index.html#>`_
-   - `Using PDFs <index.html#>`_
+- `Introduction <index.html#id3>`_
+- `Features <index.html#id4>`_
+- `Requirements <index.html#id5>`_
+- `Pipeline <index.html#id6>`_
+- `Select The Text Generation Model <index.html#id7>`_
+- `Database Creation <index.html#id8>`_
+   - `Database Creation Using Web Scraping with Firecrawl <index.html#id9>`_
+   - `Database Creation Using PDF Parsing with Llama Parse <index.html#id10>`_
+- `RAG Implementation and Text Generation <index.html#id11>`_
+   - `Using Web Scraping <index.html#id12>`_
+   - `Using PDFs <index.html#id13>`_
+- `Speech to Text <index.html#id14>`_
+- `UI Development (TheraBot Interface) <index.html#id15>`_
+   - `Using Web Scraping <index.html#id16>`_
+   - `Using PDFs <index.html#id17>`_
 
 Introduction
 ============
