@@ -21,7 +21,7 @@ vecdb = Chroma(
 # RAG retrieval logic
 def retrieve_from_db(question):
     # get the model
-    model = OllamaLLM(model="llama3.2")
+    model = OllamaLLM(model="llama3.1")
     # initialize the vector store
 
     retriever = vecdb.as_retriever()
@@ -55,7 +55,7 @@ def generate_response(user_message: str, chat_history: list=[], doc=""):
     my_message.append({"role": "user", "content": user_message, "document": doc})
 
     response = ollama.chat(                      
-    model="llama3.2",
+    model="llama3.1",
     messages=my_message
     ) 
     return response["message"]["content"]
