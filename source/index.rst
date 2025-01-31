@@ -769,7 +769,7 @@ Now we need to make the retrieval function :
 
 	def retrieve_from_db(question):
 	    # get the model
-	    model = OllamaLLM(model="llama3.2")
+	    model = OllamaLLM(model="llama3.1")
 	    # initialize the vector store
 	    retriever = vecdb.as_retriever()
 	    retrieved_docs = retriever.invoke(question)
@@ -801,7 +801,7 @@ There are many ways to do that, we can for example make a verification function 
 		#Append the latest question in message
 		my_message.append({"role": "user", "content": user_message, "document": doc})
 		response = ollama.chat(                      
-		model="llama3.2",
+		model="llama3.1",
 		messages=my_message
 		) 
 		return response["message"]["content"]
